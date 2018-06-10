@@ -1,52 +1,43 @@
 #!/usr/bin/python3
 
 import sys
-from random import choice, randint
+import random
 
 N = int(sys.argv[2])
 C = int(sys.argv[4])
+#improving initial algorithm by increasing X
+X = 5
 
-def run_gossip_alg(N):
-	def gossip_alg(node):
-		nodes_states[node] = True
-		for i in nodes_states:
-			if not i: 
-				break
-		else:
-			return
-		other_nodes = nodes_names[:node]+nodes_names[node+1:]
-		rand1 = choice(other_nodes)
-		if not nodes_states[rand1]:
-			gossip_alg(rand1)
-		rand2 = choice(other_nodes)
-		if not nodes_states[rand2]:
-			gossip_alg(rand2)
-		rand3 = choice(other_nodes)
-		if not nodes_states[rand3]:
-			gossip_alg(rand3)
-		rand4 = choice(other_nodes)
-		if not nodes_states[rand4]:
-			gossip_alg(rand4)
-		#improving initial algorithm by increasing X
-		rand5 = choice(other_nodes)
-		if not nodes_states[rand5]:
-			gossip_alg(rand5)
+def generate_x_random_nodes(node):
+	other_nodes = list(range(N))
+	other_nodes.remove(node)
+	result=[]
+	for i in range(X):
+		rand_node = random.choice(other_nodes)
+		result.append(rand_node)
+		other_nodes.remove(rand_node)
+	return result
 
-	X = 5
-	nodes_states = [False for i in range(N)]
-	nodes_names = [i for i in range(N)]
-	start = randint(0, N-1)
-	gossip_alg(start)
-	for i in nodes_states:
-			if not i: 
-				#not all nodes recieved packages
-				return False
-	else:
-		#all nodes recieved packages
-		return True
-
-count = 0
+count_all_recived = 0
 for j in range(C):
-	if run_gossip_alg(N):
-		count += 1
-print('In ' + str(count/10) + '% cases all nodes recieved the packet')
+	nodes_states = [False for i in range(N)]
+	start = random.randint(0, N-1)
+	nodes_states[start] = True
+	nodes = [start]
+	count_cycles = 1
+	while True:
+		temp = []
+		for node in nodes:
+			x_random_nodes = generate_x_random_nodes(node)
+			for i in x_random_nodes:
+				if not nodes_states[i]:
+					nodes_states[i] = True
+					temp.append(i)
+		count_cycles += 1
+		nodes = temp
+		if not temp or all(nodes_states):
+			break
+
+	if all(nodes_states):
+		count_all_recived += 1
+print('In ' + str(count_all_recived/10) + '% cases all nodes recieved the packet')
